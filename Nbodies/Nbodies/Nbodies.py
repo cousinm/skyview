@@ -1,10 +1,10 @@
-from nbodies.body import Body
+from Nbodies.Body import Body
 from multiprocessing import Pool, cpu_count, sharedctypes
 from numpy import zeros, array, ctypeslib
 from math import sqrt
 
 
-class Chain:
+class Nbodies:
     """
     A class to run through all bodies and compute evolution
     """
@@ -18,8 +18,7 @@ class Chain:
         #
         # initialize bodies
         with Pool(processes=self.ncpus) as p:
-            self.bodies = [p.apply_async(Body, args=()).get()
-                           for i in range(N)]
+            self.bodies = [p.apply_async(Body, args=()).get() for i in range(N)]
         #
         # acceleration
         self.acc = zeros((N, 3))
@@ -27,6 +26,7 @@ class Chain:
         # total mass of the system
         self.tot_mass = sum(array([b.mass for b in self.bodies]))
         #
+        # mass centre
         self.C = zeros(3)
 
     def _acceleration(self, i):
@@ -81,7 +81,7 @@ class Chain:
         for b in self.bodies:
             C += b.mass * b.X
         C /= self.tot_mass
-        return C
+        self.C = C
 
     def evolve(self, dt):
         """
@@ -90,7 +90,7 @@ class Chain:
         #
         N = len(self.bodies)
         #
-        # evolve velocities until half time step and position on full time-step
+        # evolve velocities until half time step and position on full time-step 
         with Pool(processes=self.ncpus) as p:
             self.bodies = [p.apply_async(self._evolve_i,
                                          args=(i, dt)).get() for i in range(N)]
@@ -102,11 +102,14 @@ class Chain:
         with Pool(processes=self.ncpus) as p:
             self.bodies = [p.apply_async(self._evolve_ii,
                                          args=(i, dt)).get() for i in range(N)]
+        #
+        # compute mass centre
+        self.mass_center()
 
     def _evolve_i(self, i, dt):
         """
         Evole the ith body assuming the first leap-frog step
-        """
+        """ 
         self.bodies[i].evolve_V(dt, self.acc[i])
         self.bodies[i].evolve_X(dt)
         return self.bodies[i]

@@ -1,30 +1,29 @@
-from nbodies.chain import Chain
+from Nbodies.Nbodies import Nbodies
 from copy import deepcopy
 from numpy import array, sqrt, cos, sin
 from math import pi
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
+
+def test_2bodies_problem():
+    """
+    The classical solved 2 bodies problem
+    """
     #
-    Nstep = 30
+    Nstep = 1000
     dt = 1.e-1
     #
     # Create a system with 2 bodies in the Oxy plan (z = 0.)
-    N = 3
-    sys = Chain(N)
+    N = 2
+    sys = Nbodies(N)
     #
     # body 0
-    # The mass of the body A is 10.
+    # The mass of the body A is 1.
     mA = 1.
     sys.bodies[0].mass = mA
     # The mass of the body B is 1.
     mB = 1.
     sys.bodies[1].mass = mB
-    #
-    # perturbator
-    mC = 0.01
-    sys.bodies[2].mass = mC
-    sys.bodies[2].X = array([-2., -2., 0.])
     #
     # Conics parameters
     r0 = 1.
@@ -32,8 +31,6 @@ if __name__ == '__main__':
     p = (e + 1.)*r0
     C = sqrt(p*(mA + mB))
     theta0 = pi/5.
-    dr0_dt = 0.
-    dtheta0_dt = C / r0**2.
     #
     # coordinates of body A are:
     rA = -mB / (mA + mB) * r0
@@ -62,13 +59,12 @@ if __name__ == '__main__':
     VzB = 0.
     sys.bodies[1].V = array([VxB, VyB, VzB])
     #
-    # update properties
-    sys.evaluate()
-    print('C : {}'.format(sys.C))
-    print('Ek: {}'.format(sys.Ek))
-    #
     # save initial positions
-    X = [[deepcopy(b.X-sys.C) for b in sys.bodies]]
+    X = [[deepcopy(b.X) for b in sys.bodies]]
+    #
+    # compute mass centre of the system
+    sys.mass_center()
+    C = [deepcopy(sys.C)]
     #
     # Plot theorical trajectories and initial positions
     fig = plt.figure()
@@ -106,16 +102,14 @@ if __name__ == '__main__':
              head_width=0.5, head_length=0.1,
              fc='green', ec='green')
     #
-    # mass centre
-    ax.plot(sys.C[0], sys.C[1], linestyle='None', marker='x', color='black')
-    #
     ax.axis('equal')
     #
     for i in range(Nstep):
         #
         sys.evolve(dt)
         #
-        X.append([deepcopy(b.X-sys.C) for b in sys.bodies])
+        X.append([deepcopy(b.X) for b in sys.bodies])
+        C.append(deepcopy(sys.C))
 
     # color
     color = ['blue', 'green', 'gray']
@@ -127,6 +121,11 @@ if __name__ == '__main__':
                     marker='o',
                     color=color[b],
                     markersize=3.)
+            ax.plot(C[i+1][0], C[i+1][1],
+                    linestyle='None',
+                    marker='x',
+                    color='grey',
+                    markersize=2.)
     #
-    plt.show()
+    plt.savefig('trajectories.pdf')
     plt.close()

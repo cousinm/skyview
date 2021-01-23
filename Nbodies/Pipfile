@@ -4,17 +4,17 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pylint = "*"
+flake8="*"
+numpy = "*"
 pytest = "*"
 tox = "*"
-twine = "*"
-flake8 = "*"
+matplotlib="*"
 
 [packages]
-nbodies = {editable = true,path = "."}
+Nbodies = {editable = true,path = "."}
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
 
 [scripts]
-test = "pytest"
+test = "tox"
