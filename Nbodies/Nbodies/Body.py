@@ -5,16 +5,22 @@ class Body:
     """
     A class for the individual body description
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         #
         # mass of the body
-        self.mass = 1.
+        if 'file' not in kwargs:
+            mass = 1.
+        self.mass = mass
         #
         # The position vecteor in the 3D space
-        self.X = zeros(3)
+        if 'file' not in kwargs:
+            X = zeros(3)
+        self.X = X
         #
         # The velocity vector
-        self.V = zeros(3)
+        if 'file' not in kwargs:
+            V = zeros(3)
+        self.V = V
 
     def distance(self, bj):
         """
